@@ -136,3 +136,5 @@ logs*
 eval/*.jsonl
 weights*
 out*
+eval/*_tmp
+checkpoints/

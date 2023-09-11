@@ -10,6 +10,20 @@ def get_default_params(model_name):
         return {"lr": 5.0e-4, "beta1": 0.9, "beta2": 0.999, "eps": 1.0e-8}
 
 
+def parse_bool(arg):
+    """Parse string to boolean.
+    Using type=bool in argparse does not do the right thing. E.g.
+    '--bool_flag False' will parse as True. See
+    <https://stackoverflow.com/q/15008758/1291812>
+    """
+    if arg == 'True':
+        return True
+    elif arg == 'False':
+        return False
+    else:
+        raise argparse.ArgumentTypeError("Expected 'True' or 'False'.")
+
+
 class ParseKwargs(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
         kw = {}
@@ -27,15 +41,11 @@ def parse_args(args):
     parser.add_argument(
         "--train-data",
         type=str,
-        nargs="+",
-        default=None,
         help="Path to file(s) with training data. When using webdataset, multiple datasources can be combined using the `::` separator.",
     )
     parser.add_argument(
         "--train-data-mix-weights",
-        type=float,
-        nargs="+",
-        default=None,
+        type=str,
         help=(
             "When using multiple data sources with webdataset and sampling with replacement, this can be used to upsample specific data sources. "
             "Similar to --train-data, this should be a string with as many numbers as there are data sources, separated by `::` (e.g. 1::2::0.5) "
@@ -85,7 +95,8 @@ def parse_args(args):
     parser.add_argument(
         "--dataset-resampled",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Whether to use sampling with replacement for webdataset shard selection."
     )
     parser.add_argument(
@@ -95,7 +106,8 @@ def parse_args(args):
     )
     parser.add_argument(
         "--disable-buffer",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="Turns off the shuffle buffer."
     )
@@ -107,7 +119,8 @@ def parse_args(args):
     )
     parser.add_argument(
         "--log-local",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="log files on local master, otherwise global master only.",
     )
@@ -148,17 +161,20 @@ def parse_args(args):
     parser.add_argument(
         "--log-logit-mean",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Whether to log the logit mean to wandb etc."
     )
     parser.add_argument(
         "--use-bn-sync",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Whether to use batch norm sync.")
     parser.add_argument(
         "--skip-scheduler",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="Use this flag to skip the learning rate decay.",
     )
@@ -185,13 +201,15 @@ def parse_args(args):
     )
     parser.add_argument(
         "--save-most-recent",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="Always save the most recent model trained to epoch_latest.pt.",
     )
     parser.add_argument(
         "--torchcompile",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="Compile the model, requires torch >=2.0.",
     )
@@ -225,7 +243,8 @@ def parse_args(args):
     )
     parser.add_argument(
         "--qk-norm",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="apply --model-norm to qk as in: https://arxiv.org/abs/2302.05442"
     )
@@ -238,25 +257,29 @@ def parse_args(args):
     parser.add_argument(
         "--load-pretrained-state",
         default=False,
-        action='store_true',
+        type=parse_bool,
+        choices=[True, False],
         help="Include the opt and schedule state when loading a pre-trained model.",
     )
     parser.add_argument(
         "--grad-checkpointing",
         default=False,
-        action='store_true',
+        type=parse_bool,
+        choices=[True, False],
         help="Enable gradient checkpointing.",
     )
     parser.add_argument(
         "--torchscript",
         default=False,
-        action='store_true',
+        type=parse_bool,
+        choices=[True, False],
         help="torch.jit.script the model",
     )
     parser.add_argument(
         "--trace",
         default=False,
-        action='store_true',
+        type=parse_bool,
+        choices=[True, False],
         help="torch.jit.trace the model for inference / eval only",
     )
     parser.add_argument(
@@ -275,46 +298,54 @@ def parse_args(args):
     parser.add_argument(
         "--fsdp",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Use FullyShardedDataParallel for distributed training."
     )
     parser.add_argument(
         "--fsdp-cpu-offload",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="CPU offloading for FSDP and checkpoint saving. This does not work with gradient accumulation."
     )
     parser.add_argument(
         "--fsdp-use-orig-params",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Passed into the FSDP constructor. This does not work for OPT models. Enables param_groups for weight_decay."
     )
     parser.add_argument(
         "--fsdp-amp",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Use FullyShardedDataParallel for distributed training."
     )
     parser.add_argument(
         "--fsdp-backward-prefetch",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
     )
     parser.add_argument(
         "--fsdp-hybrid",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
     )
     parser.add_argument(
         "--fsdp-checkpoint",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
     )
     parser.add_argument(
         "--fsdp-limit-all-gathers",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
     )
     parser.add_argument(
         "--report-to",
@@ -337,7 +368,8 @@ def parse_args(args):
     parser.add_argument(
         "--debug",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="If true, more information is logged."
     )
     parser.add_argument(
@@ -361,19 +393,22 @@ def parse_args(args):
     parser.add_argument(
         "--copy-codebase",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="If true, we copy the entire base on the log directory, and execute from there."
     )
     parser.add_argument(
         "--ddp-static-graph",
         default=False,
-        action='store_true',
+        type=parse_bool,
+        choices=[True, False],
         help="Enable static graph optimization for DDP in PyTorch >= 1.11.",
     )
     parser.add_argument(
         "--no-set-device-rank",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="Don't set device index from local rank (when CUDA_VISIBLE_DEVICES restricted to one per proc)."
     )
     parser.add_argument(
@@ -409,7 +444,8 @@ def parse_args(args):
     parser.add_argument(
         "--delete-previous-checkpoint",
         default=False,
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         help="If true, delete previous checkpoint after storing a new one."
     )
     parser.add_argument(
@@ -430,7 +466,8 @@ def parse_args(args):
     )
     parser.add_argument(
         "--rotary-old",
-        action="store_true",
+        type=parse_bool,
+        choices=[True, False],
         default=False,
         help="Use incorrect rotary embedding that is applied to the head dimension, which is default in xformers as of 09/01/23."
     )
@@ -441,5 +478,13 @@ def parse_args(args):
     for name, val in default_params.items():
         if getattr(args, name) is None:
             setattr(args, name, val)
+
+    if args.train_data == "openlm_mix_tri_s3":
+        args.train_data = [
+            "pipe:aws s3 cp s3://tri-ml-datasets/openlm/data/rpj_tokenized_upsampled_eleutherai/shard_{00000000..00099998}.tar -",
+            "pipe:aws s3 cp s3://tri-ml-datasets/openlm/data/2T_no_rpj_tokenized_upsampled_25k_shard/shard_{00000000..00024998}.tar -"
+        ]
+    if args.train_data_mix_weights is not None:
+        args.train_data_mix_weights = [float(x) for x in args.train_data_mix_weights.split("::")]
 
     return args
