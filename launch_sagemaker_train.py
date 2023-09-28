@@ -2,6 +2,7 @@ import argparse
 import time
 import os
 import subprocess
+import yaml
 from datetime import datetime
 
 import boto3
@@ -63,6 +64,7 @@ def main():
     parser.add_argument("--update", action="store_true", help="Update code in image, don't re-build")
     parser.add_argument("--local", action="store_true")
     parser.add_argument("--user", required=True, help="User name")
+    parser.add_argument("--cfg-path", required=True, help="Launch config")
     args = parser.parse_args()
 
     setup_tmp_name =  "./setup_renamed_for_sagemaker.py"
@@ -104,38 +106,10 @@ def main_after_setup_move(args):
 
     checkpoint_local_path = "/opt/ml/checkpoints"
 
-    train_args = {
-        "train-num-samples": 14_500_000_000,
-        "workers": 2,
-        "train-data": "openlm_mix_tri_s3",
-        "train-data-mix-weights": "0.725::0.275",
-        "precision": "amp_bfloat16",
-        "batch-size": 64,
-        "log-every-n-steps": 20,
-        "grad-clip-norm": 1,
-        "lr": 3e-3,
-        "warmup": 2000,
-        "model": "open_lm_1b",
-        "wd": 0.1,
-        "beta2": 0.95,
-        "epochs": 10,
-        "report-to": "wandb",
-        "wandb-project-name": "lm1",
-        "name": "1b_145b_2048_tri",
-        "logs": checkpoint_local_path if not args.local else "./logs/debug",
-        "resume": "latest",
-        "seed": 124,
-        "data-key": "json",
-        "accum-freq": 8,
-        "model-norm": "gain_only_layer_norm",
-        "delete-previous-checkpoint": False,
-        "fsdp": True,
-        "fsdp-amp": True,
-        "lr-cooldown-end": 3e-5,
-        "grad-checkpointing": True,
-        "dataset-resampled": True,
-    }
-
+    instance_count = 32
+    with open(args.cfg_path, "r") as f:
+        train_args = yaml.safe_load(f)
+    train_args["logs"] = checkpoint_local_path if not args.local else "./logs/debug"
 
     def get_job_name(base, train_args):
         now = datetime.now()
@@ -159,7 +133,7 @@ def main_after_setup_move(args):
         hyperparameters=train_args,
         role=role,
         image_uri=image,
-        instance_count=4,
+        instance_count=instance_count,
         instance_type="local_gpu" if args.local else "ml.p4d.24xlarge",
         # sagemaker_session=sagemaker_session,
         output_path=output_s3,
