@@ -1,4 +1,7 @@
 # OpenLM
+
+![](/plots/logo.png)
+
 OpenLM is a minimal but performative language modeling (LM) repository, aimed to facilitate research on medium sized LMs. We have verified the performance of OpenLM up to 7B parameters and 256 GPUs, with larger scales planned.
 
 # Contents
@@ -23,21 +26,15 @@ Some considerations:
 - We like [WandB](https://wandb.ai/) and [tensorboard](https://www.tensorflow.org/tensorboard) for logging. We specify how to use these during training below.
 
 ## Process Training Data
-Next you must specify a collection of tokenized data. For the purposes of this example, we will use the [Pile dataset](https://the-eye.eu/public/AI/pile/train/). If you want to download this locally, here's a bash incantation to do this (you'll likely want to do this in a detached screen, preferably overnight).
+Next you must specify a collection of tokenized data. For the purposes of this example, we will use a recent dump of english Wikipedia, available on HuggingFace. To download this locally, we've included a script located at [datapreprocess/wiki_download.py](#datapreprocess/wiki_download.py). All you have to do is specify an output directory for where the raw data should be stored:
 ```
-#!/bin/bash
-mkdir raw_data    ### or wherever you want to store raw data
-cd raw_data
-for i in {0..29}; do  ### change 0..29 if you want fewer files
-  url=$(printf "https://the-eye.eu/public/AI/pile/train/%02d.jsonl.zst" "$i")
-  wget $url
-done
+python datapreprocess/wiki_download.py --output-dir path/to/raw_data
 ```
 
 Next we process our training data by running it through a BPE tokenizer and chunk it into chunks of appropriate length. By default we use the tokenizer attached with [GPT-NeoX-20B](https://github.com/EleutherAI/gpt-neox). To do this, use the script `datapreprocess/make_2048.py`:
 ```
 >>> python datapreprocess/make_2048.py \
-    --input-files raw_data/*.jsonl
+    --input-files path_to_raw_data/*.jsonl
     --output-dir preproc_data
     --num-workers 32
     --num-consumers 1
@@ -107,18 +104,28 @@ Checkpoints and final model weights will be saved to the specified logs director
 Once trained, we can evaluate the model. This requires [LLM Foundry](https://github.com/mosaicml/llm-foundry), which can be installed via `pip install llm-foundry`. Next some configurations are required to pass to the evaluator: a skeleton of these parameters is located at [eval/in_memory_hf_eval.yaml](eval/in_memory_hf_eval.yaml). Then just run the following script, making sure to point it at the checkpoint of your trained model (and it's correspending config .json file):
 ```
 cd eval
+
 python eval_openlm_ckpt.py \
 --eval-yaml in_memory_hf_eval.yaml \
---model-config ../open_lm/model_configs/open_lm_3b.json  \ --checkpoint /path/to/openlm_checkpoint.pt
+--model open_lm_3b  \
+--checkpoint /path/to/openlm_checkpoint.pt
 ```
-
 
 # Pretrained Models
 
-## OpenLM 1B
-OpenLM 1B is a ~1Billion parameter model trained on a 1.6T token dataset which consists of a mix of RedPajama, Pile, S2ORC, The Pile of Law, Deepmind Math, and RealNews (the full mixture of training data is described in [more detail here](https://docs.google.com/spreadsheets/d/1YW-_1vGsSPmVtEt2oeeJOecH6dYX2SuEuhOwZyGwy4k/edit?usp=sharing)). The model checkpoint can be downloaded from [HuggingFace here](https://huggingface.co/mlfoundations/open_lm_1B/tree/main). The script used to train this model (for config-copying purposes) is [located here](https://github.com/mlfoundations/open_lm/blob/main/scripts/train_example.sh). Once this checkpoint has been downloaded, you can evaluate it by following the directions in the [Evaluate Model](#evaluate-model) section above:
+## [OpenLM 1B](https://huggingface.co/mlfoundations/open_lm_1B)
+OpenLM 1B is a ~1Billion parameter model trained on a 1.6T token dataset which consists of a mix of RedPajama, Pile, S2ORC, The Pile of Law, Deepmind Math, and RealNews (the full mixture of training data is described in [more detail here](https://docs.google.com/spreadsheets/d/1YW-_1vGsSPmVtEt2oeeJOecH6dYX2SuEuhOwZyGwy4k/edit?usp=sharing)).
+The model checkpoint can be downloaded from [HuggingFace here](https://huggingface.co/mlfoundations/open_lm_1B/tree/main).
+The script used to train this model (for config-copying purposes) is [located here](https://github.com/mlfoundations/open_lm/blob/main/scripts/train_example.sh).
+Once this checkpoint has been downloaded, you can evaluate it by following the directions in the [Evaluate Model](#evaluate-model) section above and passing `--rotary-old` (see note below).
 
-
+Note: We trained this model with rotary embeddings applied to the _head_
+dimension, which is the default in xformers as of 09/01/2023. Since these models
+were trained, we have updated openlm to correctly apply the rotary embeddings to
+the sequence dimension (see
+[this issue](https://github.com/mlfoundations/open_lm/issues/4) and [this
+issue](https://github.com/facebookresearch/xformers/issues/841) for details).
+To evaluate these models, ensure you use the `m1b_neox_rotary_old.json` config.
 
 | **OpenLM-1B** | **250B Tokens** | **500B tokens** | **750B tokens** | **1T Tokens** | **1.25T Tokens** | **1.5T Tokens** | **1.6T Tokens** |
 |----------------|-----------------|-----------------|-----------------|---------------|------------------|-----------------|-----------------|
@@ -156,8 +163,8 @@ OpenLM 1B is a ~1Billion parameter model trained on a 1.6T token dataset which c
 | **Average**      |     **0.50** |      **0.48** |      **0.49** |         **0.54** |
 
 
-## OpenLM 7B
-OpenLM 7B is not yet done training.
+## [OpenLM 7B](https://huggingface.co/mlfoundations/open_lm_7B_1.25T)
+OpenLM 7B is not yet done training, but we've released a checkpoint at 1.25T tokens. Information is the same as for OpenLM-1B above, including the information pertaining to rotary embeddings.
 
 
 | **OpenLM-7B**  | **275B Tokens** | **500B tokens** | **675B tokens** | **775B tokens** | **1T Tokens** | **1.25T Tokens** | **1.5T Tokens** | **1.6T Tokens** | **LLAMA-7B** | **MPT-7B** |
@@ -179,12 +186,25 @@ OpenLM 7B is not yet done training.
 | **MMLU-5 shot** |                 |                 |                 |                 |               |         **0.34** |                 |                 |     **0.34** |            |
 
 
-
 # Team and acknowledgements
 
-Team (so-far, * = equal contrib): Suchin Gururangan*, Mitchell Wortsman*, Samir Yitzhak Gadre, Achal Dave, Maciej Kilian, Weijia Shi, Georgios Smyrnis, Gabriel Ilharco, Matt Jordan, Reinhard Heckel, Alex Dimakis, Ali Farhadi, Ludwig Schmidt.
+Team (so-far, * = equal contrib): Suchin Gururangan*, Mitchell Wortsman*, Samir Yitzhak Gadre, Achal Dave, Maciej Kilian, Weijia Shi, Jean Mercat, Georgios Smyrnis, Gabriel Ilharco, Matt Jordan, Reinhard Heckel, Alex Dimakis, Ali Farhadi, Vaishaal Shankar, Ludwig Schmidt.
 
-Code is based heavily on [open-clip](https://github.com/mlfoundations/open_clip) developed by a team including Ross Wightman, Romain Beaumont, Mehdi Cherti, Jenia Jitsev, and [open-flamingo](https://github.com/mlfoundations/open_flamingo), developed by a team including Anas Awadalla and Irena Gao. Additional inspiration is from [lit-llama](https://github.com/Lightning-AI/lit-llama).
+Code is based heavily on [open-clip](https://github.com/mlfoundations/open_clip) developed by a team including Ross Wightman, Romain Beaumont, Cade Gordon, Mehdi Cherti, Jenia Jitsev, and [open-flamingo](https://github.com/mlfoundations/open_flamingo), developed by a team including Anas Awadalla and Irena Gao. Additional inspiration is from [lit-llama](https://github.com/Lightning-AI/lit-llama).
 We are greatful to stability.ai for resource support.
+OpenLM is developed by researchers from various affiliations including the [RAIVN Lab](https://raivn.cs.washington.edu/) at the University of Washington, [UWNLP](https://nlp.washington.edu/), [Toyota Research Institute](https://www.tri.global/), [Columbia University](https://www.columbia.edu/), and more.
 
-Substantial community contributors: Jean Mercat.
+Citation
+--------
+
+If you use this model in your work, please use the following BibTeX citation:
+```bibtex
+@misc{open_lm,
+  author = {Gururangan, Suchin and Wortsman, Mitchell and Gadre, Samir Yitzhak and Dave, Achal and Kilian, Maciej and Shi, Weijia and Mercat, Jean and Smyrnis, Georgios and Ilharco, Gabriel and Jordan, Matt and Heckel, Reinhard and Dimakis, Alex and Farhadi, Ali and Shankar, Vaishaal and Schmidt, Ludwig},
+  title = {{open_lm}:  a minimal but performative language modeling (LM) repository},
+  year = {2023},
+  note = {GitHub repository},
+  url = {https://github.com/mlfoundations/open_lm/}
+}
+```
+
