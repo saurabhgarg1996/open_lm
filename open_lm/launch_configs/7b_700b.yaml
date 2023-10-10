@@ -7,22 +7,23 @@ dataset-resampled: True
 delete-previous-checkpoint: False
 # Total 10B * 70 = 700B tokens
 epochs: 70
+ffn-type: gelu
 fsdp-amp: True
 fsdp: True
 fsdp-limit-all-gathers: True
+fused-xent: True
 grad-checkpointing: True
 grad-clip-norm: 1
 log-every-n-steps: 20
 lr-cooldown-end: 3e-5
 lr: 1e-3
-model-norm: "gain_only_layer_norm"
+model-norm: "lp_layer_norm"
 model: "l7b_neox"
-name: "7b_700b_2048_tri"
+name: "7b_gelu_fusedxent_lpln"
 precision: "amp_bfloat16"
 qk-norm: True
 report-to: "wandb"
 # resume: None
-resume: "s3://tri-ml-sandbox-16011-us-east-1-datasets/sagemaker/achal.dave/openlm/achal-dave-openlm_2023-10-01-13-56-05-987/checkpoint/7b_700b_2048_tri/checkpoints/epoch_9.pt"
 seed: 124
 train-data-mix-weights: "0.725::0.275"
 train-data: "openlm_mix_tri_s3"

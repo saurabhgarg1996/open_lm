@@ -51,14 +51,16 @@ def add_model_args(parser):
     parser.add_argument("--ffn-type", choices=["swiglu", "gelu"], default="swiglu")
     parser.add_argument(
         "--qk-norm",
-        action="store_true",
         default=False,
+        type=parse_bool,
+        choices=[True, False],
         help="apply --model-norm to qk as in: https://arxiv.org/abs/2302.05442"
     )
     parser.add_argument(
         "--rotary-old",
-        action="store_true",
         default=False,
+        type=parse_bool,
+        choices=[True, False],
         help="Use incorrect rotary embedding that is applied to the head dimension, which is default in xformers as of 09/01/23."
     )
 
@@ -180,7 +182,11 @@ def parse_args(args):
         "--warmup", type=int, default=10000, help="Number of steps to warmup for."
     )
     parser.add_argument(
-        "--fused-xent", action="store_true", default=False, help="Whether to use fused cross entropy"
+        "--fused-xent",
+        type=parse_bool,
+        choices=[True, False],
+        default=False,
+        help="Whether to use fused cross entropy"
     )
     parser.add_argument(
         "--z-loss-coefficient",

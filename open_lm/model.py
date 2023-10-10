@@ -192,7 +192,8 @@ class Block(nn.Module):
             # Following mosaic, which sets the second linear layer to have _is_residual=True, and
             # init_div_is_residual=True. See
             # https://github.com/mosaicml/llm-foundry/blob/bdac4c719ce331c90f512e11207a97a2d67b4c20/llmfoundry/models/utils/param_init_fns.py#L56
-            self._ff_w2.weight.div_(math.sqrt(2 * args.n_layers))
+            with torch.no_grad():
+                self._ff_w2.weight.div_(math.sqrt(2 * args.n_layers))
 
     def forward(self, x):
         h = x + self.attention(self.attention_norm(x), is_causal=True)

@@ -13,7 +13,7 @@ from sagemaker.inputs import TrainingInput
 from sagemaker_ssh_helper.wrapper import SSHEstimatorWrapper
 
 
-NAME = "openlm"
+NAME = "openlm-speedup"
 
 
 def run_command(command):
@@ -106,7 +106,7 @@ def main_after_setup_move(args):
 
     checkpoint_local_path = "/opt/ml/checkpoints"
 
-    instance_count = 32
+    instance_count = 2
     with open(args.cfg_path, "r") as f:
         train_args = yaml.safe_load(f)
     train_args["logs"] = checkpoint_local_path if not args.local else "./logs/debug"

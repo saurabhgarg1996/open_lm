@@ -21,7 +21,6 @@ ENV SAGEMAKER_SUBMIT_DIRECTORY /opt/ml/code
 COPY . /opt/ml/code/
 
 RUN pip install -r /opt/ml/code/requirements.txt
-RUN pip install -e /opt/ml/code/
 # # Prevent sagemaker from installing requirements again.
 # RUN rm /opt/ml/code/setup.py
 RUN rm /opt/ml/code/requirements.txt
