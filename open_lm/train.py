@@ -16,8 +16,8 @@ try:
 except ImportError:
     wandb = None
 
-from .distributed import is_master
-from .precision import get_autocast
+from open_lm.distributed import is_master
+from open_lm.precision import get_autocast
 
 
 class AverageMeter(object):
