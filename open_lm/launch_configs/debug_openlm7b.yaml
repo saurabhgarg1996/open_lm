@@ -1,0 +1,35 @@
+
+# Params from earlier openlm7b
+# BATCHSIZE=8
+# LR=3e-4
+# MODEL="l7b_neox"
+# WD=0.1
+# 
+# torchrun --nproc-per-node 8 \
+# --nnodes $NUM_NODES \
+# --node_rank $BOLT_TASK_ROLE_RANK \
+# --max_restarts=10000 \
+# --rdzv_backend c10d \
+# --rdzv_endpoint "$MASTER_ADDR:$MASTER_PORT" \
+# --rdzv_conf "timeout=3000,read_timeout=10000" \
+# -m open_lm.main \
+# --train-data "s3://permanent-813987666268/users/vaishaal/mlr/open_lm/rpj_tokenized_upsampled_eleutherai/shard_{00000000..00009999}.tar" "s3://permanent-813987666268/users/vaishaal/mlr/open_lm/2T_no_rpj_tokenized_upsampled_25k_shard/shard_{00000000..00024999}.tar" \
+# --train-data-mix-weights 0.725 0.275 \
+# --fsdp \
+# --train-num-samples 25000000000 \
+# --workers 2  \
+# --dataset-resampled \
+# --precision amp_bfloat16 \
+# --batch-size $BATCHSIZE \
+# --grad-checkpointing \
+# --log-every-n-steps 20 \
+# --grad-clip-norm 1 \
+# --lr $LR \
+# --model $MODEL \
+# --fsdp-amp \
+# --fsdp-limit-all-gathers \
+# --data-key json \
+# --warmup 2000 \
+# --wd $WD \
+# --beta2 0.95 \
+# --epochs 64 \
