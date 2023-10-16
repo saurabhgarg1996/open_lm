@@ -4,6 +4,7 @@ import os
 import subprocess
 import yaml
 from datetime import datetime
+from pathlib import Path
 
 import boto3
 import sagemaker
@@ -109,6 +110,8 @@ def main_after_setup_move(args):
     instance_count = 2
     with open(args.cfg_path, "r") as f:
         train_args = yaml.safe_load(f)
+    if "name" not in train_args:
+        train_args["name"] = Path(args.cfg_path).stem
     train_args["logs"] = checkpoint_local_path if not args.local else "./logs/debug"
 
     def get_job_name(base, train_args):
@@ -117,7 +120,7 @@ def main_after_setup_move(args):
         now_ms_str = f"{now.microsecond // 1000:03d}"
         date_str = f"{now.strftime('%Y-%m-%d-%H-%M-%S')}-{now_ms_str}"
 
-        job_name = "_".join([base, date_str])
+        job_name = "_".join([base, train_args["name"], date_str])
 
         return job_name
 
