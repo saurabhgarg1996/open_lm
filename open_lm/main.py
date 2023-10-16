@@ -411,10 +411,18 @@ def main(args):
             # tries to follow gopher...
             mp_policy = None
             if args.fsdp_amp:
+                assert not args.fsdp_pure_bf16
                 print("=> using bfloat16 params as part of fsdp amp policy.")
                 mp_policy = MixedPrecision(
                     param_dtype=torch.bfloat16,
                     reduce_dtype=torch.float32,
+                    buffer_dtype=torch.bfloat16,
+                )
+            elif args.fsdp_pure_bf16:
+                print("=> using pure bfloat16 params as part of fsdp amp policy.")
+                mp_policy = MixedPrecision(
+                    param_dtype=torch.bfloat16,
+                    reduce_dtype=torch.bfloat16,
                     buffer_dtype=torch.bfloat16,
                 )
 

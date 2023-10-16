@@ -339,6 +339,13 @@ def parse_args(args):
         help="Passed into the FSDP constructor. This does not work for OPT models. Enables param_groups for weight_decay."
     )
     parser.add_argument(
+        "--fsdp-pure-bf16",
+        default=False,
+        type=parse_bool,
+        choices=[True, False],
+        help="Use pure bf16 FullyShardedDataParallel for distributed training."
+    )
+    parser.add_argument(
         "--fsdp-amp",
         default=False,
         type=parse_bool,
