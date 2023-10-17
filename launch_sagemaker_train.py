@@ -14,7 +14,7 @@ from sagemaker.inputs import TrainingInput
 from sagemaker_ssh_helper.wrapper import SSHEstimatorWrapper
 
 
-NAME = "openlm-speedup"
+NAME = "openlm-p5"
 
 
 def run_command(command):
@@ -107,7 +107,7 @@ def main_after_setup_move(args):
 
     checkpoint_local_path = "/opt/ml/checkpoints"
 
-    instance_count = 2
+    instance_count = 32 if not args.local else 1
     with open(args.cfg_path, "r") as f:
         train_args = yaml.safe_load(f)
     if "name" not in train_args:
@@ -137,7 +137,7 @@ def main_after_setup_move(args):
         role=role,
         image_uri=image,
         instance_count=instance_count,
-        instance_type="local_gpu" if args.local else "ml.p4d.24xlarge",
+        instance_type="local_gpu" if args.local else "ml.p5.48xlarge",
         # sagemaker_session=sagemaker_session,
         output_path=output_s3,
         job_name=job_name,

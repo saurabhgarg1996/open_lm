@@ -509,8 +509,8 @@ def parse_args(args):
 
     if args.train_data == "openlm_mix_tri_s3":
         args.train_data = [
-            "pipe:aws s3 cp s3://tri-ml-datasets/openlm/data/rpj_tokenized_upsampled_eleutherai/shard_{00000000..00099998}.tar -",
-            "pipe:aws s3 cp s3://tri-ml-datasets/openlm/data/2T_no_rpj_tokenized_upsampled_25k_shard/shard_{00000000..00024998}.tar -"
+            "pipe:aws s3 cp s3://tri-ml-datasets/openlm/data/rpj_tokenized_upsampled_eleutherai/shard_{00000000..00099999}.tar -",
+            "pipe:aws s3 cp s3://tri-ml-datasets/openlm/data/2T_no_rpj_tokenized_upsampled_25k_shard/shard_{00000000..00024999}.tar -"
         ]
     if args.train_data_mix_weights is not None:
         args.train_data_mix_weights = [float(x) for x in args.train_data_mix_weights.split("::")]

@@ -1,0 +1,26 @@
+--train-data-mix-weights 0.725 0.275 \
+--fsdp \
+--train-num-samples 25_000_000_000 \
+--workers 2 \
+--dataset-resampled \
+--precision amp_bfloat16 \
+--batch-size 8 \
+--grad-checkpointing \
+--log-every-n-steps 20 \
+--grad-clip-norm 1 \
+--lr 3e-4 \
+--model l7b_neox \
+--fsdp-amp \
+--fsdp-limit-all-gathers \
+--data-key json \
+--warmup 2000 \
+--wd 0.1 \
+--beta2 0.95 \
+--epochs 64 \
+--data_source s3_bolt \
+--report-to wandb \
+--wandb-project-name open_lm \
+--resume s3://permanent-813987666268/users/vaishaal/mlr/open_lm/checkpoints/2023_07_18-16_11_10-model_l7b_neox-lr_0.0003-b_8/checkpoints/epoch_44.pt \
+--remote-sync s3://permanent-813987666268/users/vaishaal/mlr/open_lm/checkpoints \
+--remote-sync-frequency 300 \
+--remote-sync-protocol s3_bolt
