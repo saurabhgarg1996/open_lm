@@ -355,7 +355,7 @@ def get_wds_dataset(args, is_train, epoch=0, floor=False, tokenizer=None, data_k
         if data_key == "json":
             preprocess_json_text = preprocess_json_text_neox if args.vocab_size == 50432 else preprocess_json_text_tiktoken
             pipeline.extend([
-                wds.map_dict(json=preprocess_json_text),
+                wds.map_dict(json=preprocess_json_text, handler=log_and_continue),
                 wds.to_tuple("json"),
                 wds.select(partial(filter_lt_seqlen, args.seq_len)),
                 wds.batched(args.batch_size, partial=not is_train)

@@ -12,26 +12,27 @@ grad-checkpointing: True
 grad-clip-norm: 1
 log-every-n-steps: 20
 model: "open_lm_7b"
-name: "7b_lpln_fsdppure"
+name: "7b_p5"
 precision: "amp_bfloat16"
 report-to: "wandb"
 # resume: None
 seed: 124
 train-data-mix-weights: "0.725::0.275"
 train-data: "openlm_mix_tri_s3"
-train-num-samples: 25_000_000_000  # TODO
+train-num-samples: 25_000_000_000
 wandb-project-name: "lm1"
 workers: 4
 
 # Some important parameters, double checked with Mitchell:
 batch-size: 16
 ffn-type: swiglu
-fsdp-amp: False
-fsdp-pure-bf16: True
+fsdp-amp: True
+fsdp-pure-bf16: False
 lr: 1e-3
 lr-cooldown-end: 3e-5
-model-norm: "lp_layer_norm"
+model-norm: "gain_only_layer_norm"
 qk-norm: True
 warmup: 5000
 wd: 0.1
 z-loss-coefficient: 1e-4
+resume: s3://tri-ml-sandbox-16011-us-east-1-datasets/sagemaker/achal.dave/openlm-p5/achal-dave-openlm-p5_7b_lpln_2023-10-18-04-19-48-901/checkpoint/7b_lpln/checkpoints/epoch_3.pt

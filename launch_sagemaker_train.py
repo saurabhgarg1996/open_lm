@@ -107,7 +107,7 @@ def main_after_setup_move(args):
 
     checkpoint_local_path = "/opt/ml/checkpoints"
 
-    instance_count = 32 if not args.local else 1
+    instance_count = 30 if not args.local else 1
     with open(args.cfg_path, "r") as f:
         train_args = yaml.safe_load(f)
     if "name" not in train_args:
@@ -147,7 +147,7 @@ def main_after_setup_move(args):
         # Training using SMDataParallel Distributed Training Framework
         distribution={"torch_distributed": {"enabled": True}},
         # Max run 10 days
-        max_run=5 * 24 * 60 * 60,
+        max_run=10 * 24 * 60 * 60,
         # max_run=60 * 60,  # 60 minutes
         input_mode="FastFile",
         # environment={"TORCH_DISTRIBUTED_DEBUG": "DETAIL", "TORCH_CPP_LOG_LEVEL": "INFO"},
