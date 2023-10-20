@@ -15,7 +15,6 @@ model: "open_lm_7b"
 name: "7b_p5"
 precision: "amp_bfloat16"
 report-to: "wandb"
-# resume: None
 seed: 124
 train-data-mix-weights: "0.725::0.275"
 train-data: "openlm_mix_tri_s3"
