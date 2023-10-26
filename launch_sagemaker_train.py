@@ -153,6 +153,8 @@ def main_after_setup_move(args):
         # environment={"TORCH_DISTRIBUTED_DEBUG": "DETAIL", "TORCH_CPP_LOG_LEVEL": "INFO"},
         keep_alive_period_in_seconds=30 * 60,  # 30 minutes
         dependencies=[SSHEstimatorWrapper.dependency_dir()],
+        disable_profiler=True,
+        debugger_hook_config=False
     )
 
     # ssh_wrapper = SSHEstimatorWrapper.create(estimator, connection_wait_time_seconds=600)

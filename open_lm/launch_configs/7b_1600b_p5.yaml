@@ -4,8 +4,8 @@ beta2: 0.95
 data-key: "json"
 dataset-resampled: True
 delete-previous-checkpoint: False
-# Total 25B * 64 = 1.6T tokens
-epochs: 64
+# Total 5B * 320 = 1.6T tokens
+epochs: 320
 fsdp: True
 fsdp-limit-all-gathers: True
 grad-checkpointing: True
@@ -18,7 +18,7 @@ report-to: "wandb"
 seed: 124
 train-data-mix-weights: "0.725::0.275"
 train-data: "openlm_mix_tri_s3"
-train-num-samples: 25_000_000_000
+train-num-samples: 5_000_000_000
 wandb-project-name: "lm1"
 workers: 4
 
@@ -34,4 +34,5 @@ qk-norm: True
 warmup: 5000
 wd: 0.1
 z-loss-coefficient: 1e-4
-resume: s3://tri-ml-sandbox-16011-us-east-1-datasets/sagemaker/achal.dave/openlm-p5/achal-dave-openlm-p5_7b_lpln_2023-10-18-04-19-48-901/checkpoint/7b_lpln/checkpoints/epoch_3.pt
+resume: s3://tri-ml-sandbox-16011-us-east-1-datasets/sagemaker/achal.dave/openlm-p5/achal-dave-openlm-p5_7b_p5_2023-10-24-14-18-09-185/checkpoint/7b_p5/checkpoints/epoch_135.pt
+# resume: ./checkpoints/s3/tri-ml-sandbox-16011-us-east-1-datasets/sagemaker/achal.dave/openlm-p5/achal-dave-openlm-p5_7b_p5_2023-10-24-14-18-09-185/checkpoint/7b_p5/checkpoints/epoch_135.pt
