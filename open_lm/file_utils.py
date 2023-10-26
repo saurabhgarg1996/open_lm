@@ -7,6 +7,7 @@ import fsspec
 import torch
 from tqdm import tqdm
 import sys
+import tempfile
 
 def remote_sync_s3(local_dir, remote_dir):
     # skip epoch_latest which can change during sync.
@@ -70,6 +71,13 @@ def pt_save(pt_obj, file_path):
 def pt_load(file_path, map_location=None):
     if file_path.startswith('s3'):
         logging.info('Loading remote checkpoint, which may take a bit.')
+        tmp_file = tempfile.NamedTemporaryFile()
+        # skip epoch_latest which can change during sync.
+        result = subprocess.run(["aws", "s3", "cp", "--only-show-errors", file_path, tmp_file.name], check=True)
+        print(result)
+        out = torch.load(tmp_file.name, map_location=map_location)
+        return out
+
     of = fsspec.open(file_path, "rb")
     with of as f:
         out = torch.load(f, map_location=map_location)
